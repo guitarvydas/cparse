@@ -56,7 +56,8 @@ balanced {
           return `${block_pre}${lb}\nprintf(">> in block ${blockNumber}");\n${block_in}\nprintf("<< out block ${blockNumber}");\n${rb}${block_post}`;
       },
       matched_bottom: function (anythingelse) {
-          return anythingelse.walk (dontcare).join ('');
+          return anythingelse;
+          // return anythingelse.walk (dontcare).join ('');
       },
       anythingelse: function (c) { return c.walk (dontcare); },
       
