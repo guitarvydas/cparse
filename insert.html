@@ -12,11 +12,11 @@ textarea {
 
 <p>source:</p>
 <textarea id="src" rows="5" cols="90" placeholder="markdown" style="background-color:oldlace;">
-  x;{y;{z;}}{u;{v;}}
+  x;{y;{z;}}{u;{v;}}{a;{b;{c;}}}
 </textarea>
 
 <p>modified:</p>
-<textarea id="output" rows="7" cols="90" placeholder="transpiled"  readonly style="background-color:whitesmoke;">
+<textarea id="output" rows="27" cols="90" placeholder="transpiled"  readonly style="background-color:whitesmoke;">
 </textarea>
 <br>
 <br>
@@ -40,18 +40,24 @@ balanced {
 }
 `);
 
+  function maybe (node) {
+      if (0 < node._childWrappers.length) {
+          return 1;
+      } else {
+          return 0;
+      }
+  }
+  
   const rewriteRules = {
       main: function (matched) { return matched.walk (this.args.blockNumber); },
       matched_braces: function (_block_pre, _lb, _block_in, _rb, _block_post) {
           // "lb" means "left brace", "rb" means "right brace"
           var blockNumber = this.args.blockNumber;
-          var next = blockNumber + 1;
-          var block_pre = _block_pre.walk (next);
-          var lb = _lb.walk (next);
-          var block_in = _block_in.walk (next);
-          var rb = _rb.walk (next);
-          var block_post = _block_post.walk (next);
-          return `${block_pre}${lb}\nprintf(">> in block ${blockNumber}");\n${block_in}\nprintf("<< out block ${blockNumber}");\n${rb}${block_post}`;
+          var block_pre = _block_pre.walk (blockNumber + 0).join ('');
+          var block_in = _block_in.walk (blockNumber + maybe(_block_pre));
+          var block_post = _block_post.walk (blockNumber + maybe(_block_pre) + maybe(_block_in)).join ('');
+          //return `${block_pre}${lb}\nprintf(">> in block ${blockNumber}");\n${block_in}\nprintf("<< out block ${blockNumber}");\n${rb}${block_post}`;
+          return `${block_pre}\{\nprintf(">> in block ${blockNumber}");\n${block_in}\n\}${block_post}`;
       },
       matched_bottom: function (anythingelse) {
           return anythingelse.walk (this.args.blockNumber+1).join ('');
