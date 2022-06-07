@@ -1,0 +1,7 @@
+balanced {
+  main = matched
+  matched =
+    | matched? "{" matched "}" matched? -- braces
+     | anythingelse+                     -- bottom
+  anythingelse = ~"{" ~"}" any
+}
