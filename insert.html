@@ -191,25 +191,25 @@ balanced {
 
   const rewriteRules = {
       main: function (_matched, _optmain) {
-	  var matched = _matched.walk (this.args.blockName + ".b");
-	  var optmain = _optmain.walk (this.args.blockName + ".c");
+	  var matched = _matched.walk (this.args.depth);
+	  var optmain = _optmain.walk (this.args.depth);
 	  return matched + optmain;
       },
       matched_nested: function (_lb,_block_in, _rb) {
           // "lb" means "left brace", "rb" means "right brace"
-          var blockName = this.args.blockName;
-          var block_in = _block_in.walk (blockName + ".a");
-          return `\{\nprintf(">> enter block ${blockName}");\n${block_in}\nprintf("<< exit block ${blockName}");\}`;
+          var depth = this.args.depth;
+          var block_in = _block_in.walk (depth + 1);
+          return `\{\nprintf(">> enter depth ${depth}");\n${block_in}\nprintf("<< exit depth ${depth}");\}`;
       },
       matched_bottom: function (anythingelse) {
-          return anythingelse.walk (this.args.blockName).join ('');
+          return anythingelse.walk (this.args.depth).join ('');
       },
-      anythingelse: function (c) { return c.walk (this.args.blockName); },
+      anythingelse: function (c) { return c.walk (this.args.depth); },
       
       // required by Ohm-JS...
       _terminal: function () { return this.sourceString; },
       _iter: function (...children) {
-	  var n = this.args.blockName;
+	  var n = this.args.depth;
 	  var r = children.map(c => {
 	      var mapr = c.walk (n);
 	      return mapr;
@@ -224,9 +224,9 @@ balanced {
       if (matchResult.succeeded ()) {
           document.getElementById('status').innerHTML = "OK";
           let sem = grammar.createSemantics ();
-          sem.addOperation ('walk (blockName)', rewriteRules);
+          sem.addOperation ('walk (depth)', rewriteRules);
           let treeWalker = sem (matchResult);
-          let text = treeWalker.walk ("a");
+          let text = treeWalker.walk (0);
           var s = text.toString ();
           document.getElementById('output').value = s;
       } else {
