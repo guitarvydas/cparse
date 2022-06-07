@@ -12,7 +12,7 @@ textarea {
 
 <p>source:</p>
 <textarea id="src" rows="5" cols="90" placeholder="markdown" style="background-color:oldlace;">
-  x;{y;{z;}}
+  x;{y;{z;}}{u;{v;}}
 </textarea>
 
 <p>modified:</p>
@@ -40,8 +40,6 @@ balanced {
 }
 `);
 
-  const dontcare = -1;  // it doesn't matter what this value is
-  
   const rewriteRules = {
       main: function (matched) { return matched.walk (this.args.blockNumber); },
       matched_braces: function (_block_pre, _lb, _block_in, _rb, _block_post) {
@@ -56,9 +54,9 @@ balanced {
           return `${block_pre}${lb}\nprintf(">> in block ${blockNumber}");\n${block_in}\nprintf("<< out block ${blockNumber}");\n${rb}${block_post}`;
       },
       matched_bottom: function (anythingelse) {
-          return anythingelse.walk (dontcare).join ('');
+          return anythingelse.walk (this.args.blockNumber+1).join ('');
       },
-      anythingelse: function (c) { return c.walk (dontcare); },
+      anythingelse: function (c) { return c.walk (this.args.blockNumber+1); },
       
       // required by Ohm-JS...
       _terminal: function () { return this.sourceString; },
