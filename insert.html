@@ -10,10 +10,16 @@ textarea {
 
 <h1>Example PRINTF Inserter</h1>
 
+<!-- <p>source:</p> -->
+<!-- <textarea id="src" rows="5" cols="90" placeholder="markdown" style="background-color:oldlace;"> -->
+<!-- x;{y;{z;}}{u;{v;}}{a;{b;{c;}}} -->
+<!-- </textarea> -->
+
 <p>source:</p>
 <textarea id="src" rows="5" cols="90" placeholder="markdown" style="background-color:oldlace;">
-x;{y;{z;}}{u;{v;}}{a;{b;{c;}}}
+{y;}{z;}{u;}
 </textarea>
+
 
 <p>modified:</p>
 <textarea id="output" rows="27" cols="90" placeholder="transpiled"  readonly style="background-color:whitesmoke;">
@@ -35,31 +41,38 @@ balanced {
   main = matched main?
   matched =
     | "{" main "}" -- nested
-    | anythingelse -- bottom
+    | anythingelse+ -- bottom
   anythingelse = ~"{" ~"}" any
 }
 `);
 
   const rewriteRules = {
       main: function (_matched, _optmain) {
-	  var matched = _matched.walk (this.args.blockNumber);
-	  var optmain = _optmain.walk (this.args.blockNumber + 1);
+	  var matched = _matched.walk (this.args.blockName + ".b");
+	  var optmain = _optmain.walk (this.args.blockName + ".c");
 	  return matched + optmain;
       },
       matched_nested: function (_lb,_block_in, _rb) {
           // "lb" means "left brace", "rb" means "right brace"
-          var blockNumber = this.args.blockNumber;
-          var block_in = _block_in.walk (blockNumber+1);
-          return `\{\nprintf(">> in block ${blockNumber}");\n${block_in}\n\}`;
+          var blockName = this.args.blockName;
+          var block_in = _block_in.walk (blockName + ".a");
+          return `\{\nprintf(">> in block ${blockName}");\n${block_in}\n\}`;
       },
       matched_bottom: function (anythingelse) {
-          return anythingelse.walk (this.args.blockNumber);
+          return anythingelse.walk (this.args.blockName);
       },
-      anythingelse: function (c) { return c.walk (this.args.blockNumber); },
+      anythingelse: function (c) { return c.walk (this.args.blockName); },
       
       // required by Ohm-JS...
       _terminal: function () { return this.sourceString; },
-      _iter: function (...children) { return children.map(c => c.walk (this.args.blockNumber)); }
+      _iter: function (...children) {
+	  var n = this.args.blockName;
+	  var r = children.map(c => {
+	      var mapr = c.walk (n);
+	      return mapr;
+	  });
+	  return r;
+      }
   };
 
   function insert () {
@@ -68,9 +81,9 @@ balanced {
       if (matchResult.succeeded ()) {
           document.getElementById('status').innerHTML = "OK";
           let sem = grammar.createSemantics ();
-          sem.addOperation ('walk (blockNumber)', rewriteRules);
+          sem.addOperation ('walk (blockName)', rewriteRules);
           let treeWalker = sem (matchResult);
-          let text = treeWalker.walk (1);
+          let text = treeWalker.walk ("a");
           var s = text.toString ();
           document.getElementById('output').value = s;
       } else {
