@@ -190,38 +190,38 @@ balanced {
 `);
 
       const rewriteRules = {
-	  main: function (_matched, _optmain) {
-	      var matched = _matched.walk (this.args.depth);
-	      var optmain = _optmain.walk (this.args.depth);
-	      return matched + optmain;
-	  },
-	  matched_nested: function (_lb,_block_in, _rb) {
+          main: function (_matched, _optmain) {
+              var matched = _matched.walk (this.args.depth);
+              var optmain = _optmain.walk (this.args.depth);
+              return matched + optmain;
+          },
+          matched_nested: function (_lb,_block_in, _rb) {
               // "lb" means "left brace", "rb" means "right brace"
               var depth = this.args.depth;
               var block_in = _block_in.walk (depth + 1);
               return `\{\nprintf(">> enter depth ${depth}");\n${block_in}\nprintf("<< exit depth ${depth}");\}`;
-	  },
-	  matched_bottom: function (anythingelse) {
+          },
+          matched_bottom: function (anythingelse) {
               return anythingelse.walk (this.args.depth).join ('');
-	  },
-	  anythingelse: function (c) { return c.walk (this.args.depth); },
-	  
-	  // required by Ohm-JS...
-	  _terminal: function () { return this.sourceString; },
-	  _iter: function (...children) {
-	      var n = this.args.depth;
-	      var r = children.map(c => {
-		  var mapr = c.walk (n);
-		  return mapr;
-	      });
-	      return r;
-	  }
+          },
+          anythingelse: function (c) { return c.walk (this.args.depth); },
+          
+          // required by Ohm-JS...
+          _terminal: function () { return this.sourceString; },
+          _iter: function (...children) {
+              var n = this.args.depth;
+              var r = children.map(c => {
+                  var mapr = c.walk (n);
+                  return mapr;
+              });
+              return r;
+          }
       };
 
       function insert () {
-	  let src = document.getElementById('src').value;
-	  let matchResult = grammar.match (src);
-	  if (matchResult.succeeded ()) {
+          let src = document.getElementById('src').value;
+          let matchResult = grammar.match (src);
+          if (matchResult.succeeded ()) {
               document.getElementById('status').innerHTML = "OK";
               let sem = grammar.createSemantics ();
               sem.addOperation ('walk (depth)', rewriteRules);
@@ -229,9 +229,9 @@ balanced {
               let text = treeWalker.walk (0);
               var s = text.toString ();
               document.getElementById('output').value = s;
-	  } else {
+          } else {
               document.getElementById('status').innerHTML = "parse FAILED";
-	  }
+          }
       }
     </script>
   </body>
